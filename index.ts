@@ -5,55 +5,68 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const telegramToken = process.env.TELEGRAM_TOKEN || "";
+try {
+  const telegramToken = process.env.TELEGRAM_TOKEN || "";
+  const channelId = process.env.CHANNEL_ID || "";
 
-if (!telegramToken || telegramToken === "") {
-  throw new Error("Please provide a token via environment variables");
-}
-
-const bot = new Telegraf(telegramToken);
-let chatId = 0;
-
-bot.start((ctx) => {
-  chatId = ctx.chat.id;
-  ctx.reply("Este bot te avisa si hay figuritas con un mensaje en telegram.");
-});
-
-const url =
-  "https://www.zonakids.com/productos/pack-x-25-sobres-de-figuritas-fifa-world-cup-qatar-2022/";
-
-cron.schedule("* * * * *", async () => {
-  console.log(
-    `Running on: ${new Date().toLocaleString("es-AR", {
-      timeZone: "America/Buenos_Aires",
-    })}`
-  );
-
-  const browser = await chromium.launch();
-  const page = await browser.newPage();
-  await page.goto(url);
-
-  const content = await page.inputValue('#product_form input[type="submit"]');
-
-  if (content === "Sin stock") {
-    console.log("SIN STOCK");
-  } else {
-    bot.telegram.sendMessage(
-      chatId,
-      `
-      *HAY FIGURITAS!!*
-      Se detectó stock en el pack x25 sobres de Panini.
-      Andá a ${url}
-    `,
-      {
-        parse_mode: "MarkdownV2",
-      }
-    );
+  if (!telegramToken || telegramToken === "") {
+    throw new Error("Please provide a token via environment variables");
   }
 
-  await browser.close();
-});
+  const bot = new Telegraf(telegramToken);
+  let chatId = 0;
 
-bot.launch();
+  bot.start((ctx) => {
+    chatId = ctx.chat.id;
+    ctx.reply("Este bot te avisa si hay figuritas con un mensaje en telegram.");
+  });
 
-console.log("bot started!");
+  const url =
+    "https://www.zonakids.com/productos/1-album-tapa-dura-fifa-world-cup-qatar-2022/";
+
+  const toescape = `
+  *HAY FIGURITAS\\!\\!*
+  HAY STOCK DEL ALBUM TAPA DURA.
+  Andá a ${url}
+`;
+
+const message = toescape.replace(/\./g, "\\.").replace(/\-/g, "\\-");
+
+  cron.schedule("0,30 * * * * *", async () => {
+    console.log(
+      `Running on: ${new Date().toLocaleString("es-AR", {
+        timeZone: "America/Buenos_Aires",
+      })}`
+    );
+
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto(url);
+
+    const content = await page.inputValue('#product_form input[type="submit"]');
+    if (content === "Sin stock") {
+      console.log("SIN STOCK");
+    }
+    else {
+      bot.telegram.sendMessage(
+        channelId,
+        message,
+        {
+          parse_mode: "MarkdownV2",
+        }
+      );
+    }
+
+    await browser.close();
+  });
+
+  bot.launch();
+  // Enable graceful stop
+  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+  console.log("bot started!");
+}
+catch (e) {
+  console.log(e);
+}
