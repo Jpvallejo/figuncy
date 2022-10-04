@@ -5,9 +5,9 @@
     "main": "index.ts",
     "scripts": {
         "build": "tsc index.ts",
-        "start": "nodemon index.ts",
+        "dev": "nodemon index.ts",
         "deploy": "npm run build && node index.js",
-        "heroku-postbuild": "npm run deploy"
+        "start": "npm run deploy"
     },
     "keywords": [],
     "author": "",
