@@ -45,13 +45,7 @@ const message = toescape.replace(/\./g, "\\.").replace(/\-/g, "\\-");
 
     const content = await page.inputValue('#product_form input[type="submit"]');
     if (content === "Sin stock") {
-      bot.telegram.sendMessage(
-        channelId,
-        "SIN STOCK",
-        {
-          parse_mode: "MarkdownV2",
-        }
-      );
+      console.log("SIN STOCK");
     }
     else {
       bot.telegram.sendMessage(
