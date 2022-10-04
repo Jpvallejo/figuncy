@@ -1,5 +1,5 @@
 import { chromium } from "playwright";
-import cron from "node-cron";
+import * as cron from "node-cron";
 import { Telegraf } from "telegraf";
 import * as dotenv from "dotenv";
 
